@@ -3,9 +3,6 @@ name: Build KOOKY WOOKY APK
 on:
   workflow_dispatch:
   push:
-    paths:
-      - '*.zip'
-      - '.github/workflows/**'
 
 jobs:
   build:
@@ -26,7 +23,7 @@ jobs:
 
       - name: Extract Android project
         run: |
-          ZIP=$(find . -maxdepth 1 -name '*.zip' | head -n 1)
+          ZIP=$(find . -maxdepth 1 -name "*.zip" | head -n 1)
           unzip -q "$ZIP" -d extracted
           PROJECT=$(find extracted -name settings.gradle | head -n 1 | xargs dirname)
           echo "PROJECT=$PROJECT" >> $GITHUB_ENV
