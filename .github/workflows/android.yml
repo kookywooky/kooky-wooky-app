@@ -3,6 +3,9 @@ name: Build KOOKY WOOKY APK
 on:
   workflow_dispatch:
   push:
+    paths:
+      - '*.zip'
+      - '.github/workflows/**'
 
 jobs:
   build:
@@ -21,15 +24,35 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Extract Corrected Android Project
+      - name: Extract Android Project
         run: |
           ZIP="KOOKY_WOOKY_Android_Studio_Project_CORRECTED.zip"
           test -f "$ZIP"
-          mkdir extracted
+          mkdir -p extracted
           unzip -q "$ZIP" -d extracted
-          PROJECT=$(find extracted \( -name settings.gradle -o -name settings.gradle.kts \) -print -quit | xargs dirname)
+          PROJECT=$(find extracted \( -name settings.gradle -o -name settings.gradle.kts \) | head -n 1 | xargs dirname)
           test -n "$PROJECT"
           echo "PROJECT=$PROJECT" >> $GITHUB_ENV
+
+      - name: Fix Website URL
+        run: |
+          MAIN=$(find "$PROJECT" -name MainActivity.java | head -n 1)
+          test -n "$MAIN"
+          python3 - "$MAIN" <<'PY'
+          import re, sys
+          p = sys.argv[1]
+          s = open(p).read()
+          s, n = re.subn(
+              r'(HOME\s*=\s*")[^"]*(")',
+              r'\1https://kookywooky.netlify.app\2',
+              s,
+              count=1
+          )
+          if n == 0:
+              raise SystemExit("HOME URL line nahi mili")
+          open(p, "w").write(s)
+          print("Website URL updated:", p)
+          PY
 
       - name: Build APK
         run: |
