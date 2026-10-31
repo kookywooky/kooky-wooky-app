@@ -1,40 +1,43 @@
 name: Build KOOKY WOOKY APK
 
 on:
-  workflow_dispatch:
-  push:
+workflow_dispatch:
+push:
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+build:
+runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+steps:
+  - name: Checkout
+    uses: actions/checkout@v4
 
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
+  - name: Setup Java
+    uses: actions/setup-java@v4
+    with:
+      distribution: temurin
+      java-version: '17'
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+  - name: Setup Gradle
+    uses: gradle/actions/setup-gradle@v4
 
-      - name: Extract Android project
-        run: |
-          ZIP=$(find . -maxdepth 1 -name "*.zip" | head -n 1)
-          unzip -q "$ZIP" -d extracted
-          PROJECT=$(find extracted -name settings.gradle | head -n 1 | xargs dirname)
-          echo "PROJECT=$PROJECT" >> $GITHUB_ENV
+  - name: Extract Corrected Android Project
+    run: |
+      ZIP="KOOKY_WOOKY_Android_Studio_Project_CORRECTED.zip"
+      test -f "$ZIP"
+      mkdir extracted
+      unzip -q "$ZIP" -d extracted
+      PROJECT=$(find extracted -name settings.gradle -o -name settings.gradle.kts | head -n 1 | xargs dirname)
+      test -n "$PROJECT"
+      echo "PROJECT=$PROJECT" >> $GITHUB_ENV
 
-      - name: Build APK
-        run: |
-          cd "$PROJECT"
-          gradle assembleDebug
+  - name: Build APK
+    run: |
+      cd "$PROJECT"
+      gradle assembleDebug
 
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: KOOKY-WOOKY-APK
-          path: extracted/**/app/build/outputs/apk/debug/*.apk
+  - name: Upload APK
+    uses: actions/upload-artifact@v4
+    with:
+      name: KOOKY-WOOKY-APK
+      path: extracted/**/app/build/outputs/apk/debug/*.apk
