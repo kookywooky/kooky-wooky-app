@@ -15,7 +15,7 @@ public class MainActivity extends Activity {
     private ValueCallback<Uri[]> fileCallback;
     private static final int FILE_CHOOSER = 1001;
     private static final String HOME = "https://kookywooky.netlify.app";
-
+// Updated website build
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Window w = getWindow();
